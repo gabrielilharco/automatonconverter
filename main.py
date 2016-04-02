@@ -5,7 +5,7 @@ def enfa_from_file(fname):
 
 	states_list = [s for s in content[0].split('\t')]
 	alph_list = [s for s in content[1].split('\t')]
-	initial_state = content[2].split('\t')
+	initial_state = content[2].split('\t')[0]
 	terminal_states = [s for s in content[3].split(';')]
 
 	transitions = {}
@@ -37,7 +37,7 @@ def main():
 	conv = AutomatonConverter()
 	enfa = enfa_from_file("test/entr1.txt")
 
-	# # dummy nfa
+	# dummy nfa
 	# nfa = NFA()
 	# nfa.add_states(['q0', 'q1', 'q2'])
 	# nfa.alphabet = set(['a', 'b'])
@@ -52,8 +52,8 @@ def main():
 	# dfa = conv.dfa_from_nfa(nfa)
 	# dfa.output_to_file("dfa.txt")
 
-	# dfa = conv.dfa_from_enfa(enfa)
-	#dfa.output_to_file("dfa.txt")
+	dfa = conv.dfa_from_enfa(enfa)
+	dfa.output_to_file("dfa.txt")
 
 if __name__ == '__main__':
 	main()

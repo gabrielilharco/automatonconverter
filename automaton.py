@@ -70,14 +70,22 @@ class DFA(object):
 class AutomatonConverter(object):
 	def dfa_from_enfa(self, enfa):
 		nfa = self.nfa_from_enfa(enfa)
+
+		print nfa.states
+		print nfa.alphabet
+		print nfa.initial_state
+		print nfa.terminal_states
+		print nfa.transitions
+
 		dfa = self.dfa_from_nfa(nfa)
 
 		return dfa
 
 	def nfa_from_enfa(self, enfa):
 		nfa = NFA()
-		nfa.states = enfa.states
+		nfa.add_states(enfa.states)
 		nfa.alphabet = enfa.alphabet
+		nfa.alphabet.remove('e')
 		nfa.initial_state = enfa.initial_state
 		nfa.terminal_states = enfa.terminal_states
 
@@ -114,7 +122,7 @@ class AutomatonConverter(object):
 			current_dfa_state = unprocessed_states.pop()
 			dfa.transitions[current_dfa_state] = {}
 			
-			for symbol in dfa.alphabet: 
+			for symbol in dfa.alphabet:
 				next_states = set()
 				for nfa_state in current_dfa_state:
 					next_states.update(nfa.transitions[nfa_state][symbol])
@@ -126,6 +134,6 @@ class AutomatonConverter(object):
 					unprocessed_states.add(frozenset(next_states))
 
 		for state in dfa.states: 
-			if state and len(state & nfa.terminal_states) > 0: 
+			if state and len(state & set(nfa.terminal_states)) > 0: 
 				dfa.terminal_states.update(state)
 		return dfa
