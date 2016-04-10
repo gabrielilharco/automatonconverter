@@ -20,7 +20,7 @@ def enfa_from_file(fname):
 			
 			transitions[ori][alph_list[idx]] = []
 			for j in range(len(trs)):
-				if (trs[j] == '-'): continue
+				if trs[j] == '-': continue
 				transitions[ori][alph_list[idx]].append(trs[j])
 		# print states_list
 		# print alph_list
@@ -35,7 +35,8 @@ def enfa_from_file(fname):
 
 def main():
 	conv = AutomatonConverter()
-	enfa = enfa_from_file("test/entr1.txt")
+	from sys import argv
+	enfa = enfa_from_file(argv[1])
 
 	# dummy nfa
 	# nfa = NFA()

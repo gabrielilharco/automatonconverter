@@ -4,7 +4,11 @@
 # n linhas de k colunas+1 colunas, contendo:
 # nome do estado e as transições, separados por ;
 
+from __future__ import print_function
 import copy
+
+def setToString(varset):
+	return '{{{}}}'.format(', '.join(map(repr, varset)))
 
 class eNFA(object):
 	def __init__(self, states, alphabet,
@@ -13,7 +17,8 @@ class eNFA(object):
 
 		self.states = set(states)
 		self.alphabet = set(alphabet)
-		self.transitions = transitions  # map de estados pra um map de alphabeto - set de estados 
+		# map de (estados -> map de (alphabeto -> set de estados))
+		self.transitions = transitions
 		self.initial_state = initial_state
 		self.terminal_states = terminal_states
 
@@ -23,7 +28,7 @@ class eNFA(object):
 
 		stack = []
 		stack.append(state)
-		while(len(stack) > 0):
+		while len(stack) > 0:
 			curr = stack.pop()
 
 			if 'e' not in self.transitions[curr].keys(): continue
@@ -39,7 +44,8 @@ class NFA(object):
 	def __init__(self):
 		self.states = set()
 		self.alphabet = set()
-		self.transitions = {} # map de estados pra um map de alphabeto - set de estados 
+		# map de (estados -> map de (alphabeto -> set de estados))
+		self.transitions = {}
 		self.initial_state = None
 		self.terminal_states = set()
 
@@ -54,28 +60,65 @@ class DFA(object):
 	def __init__(self):
 		self.states = set()
 		self.alphabet = set()
-		self.transitions = {} # map de estados pra um map de alphabeto - estado
+		# map de (estados -> map de (alphabeto -> estado))
+		self.transitions = {}
 		self.initial_state = None
 		self.terminal_states = set()
 
-	def output_to_file(self, filename):
-		print "Printing states:"
-		for state in self.states:
-			print state
+	def isTerminal(self, state):
+		for single in state:
+			if single in self.terminal_states:
+				return True
+		return False
 
-		for state in self.transitions:
-			for symbol in self.alphabet:
-				print "State: " + str(state) + " - " + symbol + " - " + str(self.transitions[state][symbol]) 
+	def output_to_file(self, filename):
+		# print "Printing states:"
+		# for state in self.states:
+		# 	print state
+
+		# for state in self.transitions:
+		# 	for symbol in self.alphabet:
+		# 		print "State: " +str(state) + \
+		# 		" - " + symbol + " - " + \
+		# 		str(self.transitions[state][symbol])
+		
+		basesize = 15
+		columnwidth = basesize + 1
+		width = columnwidth * (len(self.alphabet) + 1)
+		print ("Output DFA")
+		print (width * "-")
+		print ((width-columnwidth) / 2 * "-" + \
+			"Transition Table" + (width-columnwidth) / 2 * "-")
+		print (width * "-")
+		print ("     State     |", end="", sep = "")
+		for alpha in self.alphabet:
+			print("{:>{basesize}}|".format(
+				alpha, basesize=basesize), end="", sep="")
+		print ("\n"+ width * "-")
+		for state in sorted(self.states):
+			outputState = setToString(state)
+			if state in self.terminal_states:
+				outputState = "*" + outputState
+			elif state == self.initial_state:
+				outputState = "->" + outputState
+			print ("{:>{basesize}}|".format(
+				outputState, basesize=basesize),end="", sep = "")
+			for alpha in self.alphabet:
+				print("{:>{basesize}}|".format(
+					setToString(self.transitions[state][alpha]),
+					basesize=basesize), end="", sep="")
+			print()
+		print (width * "-")
 
 class AutomatonConverter(object):
 	def dfa_from_enfa(self, enfa):
 		nfa = self.nfa_from_enfa(enfa)
 
-		print nfa.states
-		print nfa.alphabet
-		print nfa.initial_state
-		print nfa.terminal_states
-		print nfa.transitions
+		# print nfa.states
+		# print nfa.alphabet
+		# print nfa.initial_state
+		# print nfa.terminal_states
+		# print nfa.transitions
 
 		dfa = self.dfa_from_nfa(nfa)
 
@@ -106,7 +149,7 @@ class AutomatonConverter(object):
 
 			for s_e in e_closure:
 				for symbol, s_trs in enfa.transitions[s_e].iteritems():
-					if (symbol == 'e'): continue
+					if symbol == 'e': continue
 					for s_tr in s_trs:
 						nfa.transitions[s][symbol].append(s_tr)
 				
@@ -132,8 +175,7 @@ class AutomatonConverter(object):
 				if not next_states in dfa.states: 
 					dfa.states.add(frozenset(next_states))
 					unprocessed_states.add(frozenset(next_states))
-
 		for state in dfa.states: 
-			if state and len(state & set(nfa.terminal_states)) > 0: 
-				dfa.terminal_states.update(state)
+			if state and len(state & set(nfa.terminal_states)) > 0:
+				dfa.terminal_states.add(state)
 		return dfa
