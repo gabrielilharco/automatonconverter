@@ -17,14 +17,12 @@ class eNFA(object):
 
 		self.states = set(states)
 		self.alphabet = set(alphabet)
-		# map de (estados -> map de (alphabeto -> set de estados))
 		self.transitions = transitions
 		self.initial_state = initial_state
 		self.terminal_states = terminal_states
 
 	def e_closure(self, state):
 		e_clo = set()
-		#e_clo.add(state)
 
 		stack = []
 		stack.append(state)
@@ -40,11 +38,39 @@ class eNFA(object):
 
 		return e_clo
 
+	@staticmethod
+	def get_from_file(fname):
+		content = [line.rstrip('\n') for line in open(fname)]
+
+		states_list = [s for s in content[0].split('\t')]
+		alph_list = [s for s in content[1].split('\t')]
+		initial_state = content[2].split('\t')[0]
+		terminal_states = [s for s in content[3].split(';')]
+
+		transitions = {}
+		for i in range(len(states_list)):
+			t_line = content[i + 4].split('\t')
+			ori = states_list[i]
+
+			transitions[ori] = {}
+
+			for idx, t_col in enumerate(t_line):
+				trs = t_col.split(';')
+				
+				transitions[ori][alph_list[idx]] = []
+				for j in range(len(trs)):
+					if trs[j] == '-': continue
+					transitions[ori][alph_list[idx]].append(trs[j])
+
+		return eNFA(states_list, alph_list,
+			transitions, initial_state,
+			terminal_states)
+
+
 class NFA(object):
 	def __init__(self):
 		self.states = set()
 		self.alphabet = set()
-		# map de (estados -> map de (alphabeto -> set de estados))
 		self.transitions = {}
 		self.initial_state = None
 		self.terminal_states = set()
@@ -60,7 +86,6 @@ class DFA(object):
 	def __init__(self):
 		self.states = set()
 		self.alphabet = set()
-		# map de (estados -> map de (alphabeto -> estado))
 		self.transitions = {}
 		self.initial_state = None
 		self.terminal_states = set()
@@ -72,15 +97,6 @@ class DFA(object):
 		return False
 
 	def output_to_file(self, filename):
-		# print "Printing states:"
-		# for state in self.states:
-		# 	print state
-
-		# for state in self.transitions:
-		# 	for symbol in self.alphabet:
-		# 		print "State: " +str(state) + \
-		# 		" - " + symbol + " - " + \
-		# 		str(self.transitions[state][symbol])
 		
 		basesize = 15
 		columnwidth = basesize + 1
@@ -113,12 +129,6 @@ class DFA(object):
 class AutomatonConverter(object):
 	def dfa_from_enfa(self, enfa):
 		nfa = self.nfa_from_enfa(enfa)
-
-		# print nfa.states
-		# print nfa.alphabet
-		# print nfa.initial_state
-		# print nfa.terminal_states
-		# print nfa.transitions
 
 		dfa = self.dfa_from_nfa(nfa)
 
