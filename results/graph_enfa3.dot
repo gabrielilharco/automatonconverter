@@ -1,0 +1,16 @@
+digraph finite_state_machine {
+	rankdir=LR;
+
+	node [shape = point ]; ini;
+	node [shape = doublecircle]; q3;
+
+	node [shape = circle];
+	ini -> S
+	S -> q0[label=a]
+	q0 -> q1[label=<&epsilon;>]
+	q1 -> q2[label=<&epsilon;>]
+	q1 -> q3[label=<&epsilon;>]
+	q1 -> q2[label=a]
+	q2 -> q3[label=b]
+	q2 -> q0[label=b]
+}
